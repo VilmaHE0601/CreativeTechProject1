@@ -1,0 +1,202 @@
+For my week 2 assignment, I choose three API:
+NASA image: https://api.nasa.gov/planetary/apod
+NewYorkTimes articles: https://api.nytimes.com/svc/search/v2/articlesearch.json
+Weatherstack: http://api.weatherstack.com/current
+
+
+In this website, the user will click on the 'Fetch Data' button by setting the past date. 
+The site will automatically pull NASA images, NewYorkTimes articles from three APIs for that date. 
+Originally, in my vision, Weatherstack was also supposed to be fetched the Pasadena weather for the current date set, 
+but I realized that access rights to fetch historical weather requires a paid subscription, so I changed it to the current Pasaedna weather.
+
+Here is my final coding:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch NASA Image and NYT News by Date</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <input type="date" id="inputDate">
+    <button role="button" id="initTrigger">Fetch Data</button>
+    
+    <section id="NASAimage"></section>
+    <section id="nytSection"></section>
+    <section id="weatherSection"></section>
+
+    <script>
+        const triggerButton = document.getElementById('initTrigger');
+        const NASAsection = document.getElementById('NASAimage');
+        const nytSection = document.getElementById('nytSection');
+        const weatherSection = document.getElementById('weatherSection');
+
+
+        const nasaAPODurl = "https://api.nasa.gov/planetary/apod";
+        const nasaAPIkey = "mqLSI49VpEANWuBrakvNEdfOQhgOGrbPT4OAYzdD";  // Replace with your actual NASA API key
+
+        const nytAPIurl = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
+        const nytAPIkey = "IGCAJRBTZV5G9kj9DJTAOhTjIWn4pD5f"; // Replace with your actual NYT API key
+
+        const weatherAPIurl = "http://api.weatherstack.com/current?access_key=afb7f5eb9ff9061cd7655198c6767b93";
+        //const weatherAPIkey = "afb7f5eb9ff9061cd7655198c6767b93"; // Replace with your actual Weatherstack API key
+
+        // Function to fetch and display NASA data
+        function fetchAndDisplayNASAData(picDate) {
+            const fetchURL = `${nasaAPODurl}?api_key=${nasaAPIkey}&date=${picDate}`;
+            fetch(fetchURL)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    // Clear previous content
+                    NASAsection.innerHTML = '';
+
+                    if (!data || !data.title || !data.url) {
+                        throw new Error('Missing data fields from NASA API response');
+                    }
+
+                    const picTitle = data.title;
+                    const imgURL = data.url;
+
+                    const picHeader = document.createElement('h3');
+                    picHeader.innerText = picTitle;
+                    NASAsection.appendChild(picHeader);
+
+                    const nasaImg = document.createElement('img');
+                    nasaImg.src = imgURL;
+                    nasaImg.alt = "NASA image of " + picTitle;
+                    NASAsection.appendChild(nasaImg);
+                })
+                .catch((error) => {
+                    console.error('Error fetching NASA data:', error);
+                    NASAsection.innerHTML = "<p>Error loading NASA image.</p>";
+                });
+        }
+
+        // Function to fetch and display NYT data
+        function fetchAndDisplayNYTData(picDate) {
+            const formattedDate = picDate.replaceAll('-', '');
+            const fetchURL = `${nytAPIurl}?api-key=${nytAPIkey}&q=space&begin_date=${formattedDate}&end_date=${formattedDate}`;
+            fetch(fetchURL)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (!data || !data.response || !data.response.docs) {
+                        throw new Error('Unexpected response structure from NYT API');
+                    }
+
+
+                    // Clear previous content
+                    nytSection.innerHTML = '';
+
+                    const articles = data.response.docs;
+                    const nytHeader = document.createElement('h3');
+                    nytHeader.innerText = "New York Times Articles:";
+                    nytSection.appendChild(nytHeader);
+
+                    const ul = document.createElement('ul');
+                    articles.forEach(article => {
+                        const li = document.createElement('li');
+                        li.innerText = article.headline.main;
+                        ul.appendChild(li);
+                    });
+                    nytSection.appendChild(ul);
+                })
+                .catch((error) => {
+                    console.error('Error fetching NYT data:', error);
+                    nytSection.innerHTML = `<p>Error loading NYT articles. ${error}</p>`;
+                });
+        }
+
+        // Function to fetch and display current Weather data for Pasadena
+function fetchAndDisplayWeatherData() {
+    const location = 'Pasadena'; // Specify the location for the weather data
+    const fetchURL = `${weatherAPIurl}&query=${location}`;
+    fetch(fetchURL)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then((data) => {
+            console.log('Weather data:', data); // Log the full data for inspection
+
+            if (!data || !data.current) {
+                console.error('Unexpected response structure:', data);
+                throw new Error('Unexpected response structure from Weatherstack API');
+            }
+
+            if (!weatherSection) {
+                console.error('weatherSection element is null or does not exist');
+                throw new Error('weatherSection element is null or does not exist');
+            }
+
+            weatherSection.innerHTML = '';
+
+            const weatherData = data.current;
+            const weatherHeader = document.createElement('h3');
+            weatherHeader.innerText = "Current Weather in Pasadena:";
+            weatherSection.appendChild(weatherHeader);
+
+            const weatherInfo = document.createElement('p');
+            weatherInfo.innerText = `Temperature: ${weatherData.temperature}°C\nDescription: ${weatherData.weather_descriptions.join(', ')}`;
+            weatherSection.appendChild(weatherInfo);
+        })
+        .catch((error) => {
+            console.error('Error fetching Weather data:', error);
+            weatherSection.innerHTML = `<p>Error loading weather data. ${error}</p>`;
+        });
+}
+
+// Modify the event listener to not expect a date for weather data
+triggerButton.addEventListener("click", () => {
+    const inputDate = document.getElementById('inputDate').value;
+    if (inputDate) {
+        fetchAndDisplayNASAData(inputDate);
+        fetchAndDisplayNYTData(inputDate);
+        fetchAndDisplayWeatherData(); // Call without date
+    } else {
+        alert("Please select a date.");
+    }
+});
+    </script>
+</body>
+</html>
+
+Here are some screenshots in my website:
