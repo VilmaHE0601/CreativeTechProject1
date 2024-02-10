@@ -12,3 +12,6 @@ Diagrams Of The Mechanics:
 
 The Questions In The Brief:
 
+We work in the digital field through different APIs and services for data acquisition, presentation and processing. A wide variety of data such as astronomy, news, weather, menus and animal pictures are delivered through this technology. This system is used in a variety of scenarios, through integration and user triggers to produce interesting and unexpected results. For example, in my website, users can combine astronomical data and weather at the click of a button, or analyze weather patterns during a specific news event to reveal certain interesting correlations.
+
+There can be many user triggers, the click of a button being one of the most common. The result of this is to produce a user-friendly, responsive application or website for the user that provides useful and timely information based on the user's needs, increasing the user experience.
