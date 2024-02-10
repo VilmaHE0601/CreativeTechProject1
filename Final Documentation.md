@@ -5,6 +5,8 @@ Welcome to a unique digital experience that brings together daily astronomical i
 
 
 Diagrams Of The Mechanics:
+
+
 ![A4 - 5 copy](https://github.com/VilmaHE0601/CreativeTechProject1/assets/146425185/42fc7874-2560-434a-92b6-70df8c440465)
 
 
